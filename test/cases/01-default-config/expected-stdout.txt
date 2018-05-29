@@ -1,0 +1,4 @@
+[Wed, 23 May 2018 20:42:56 GMT] {{filePath}}:12:5 \u001b[1m\u001b[37m[\u001b[40m\u001b[33mWARNING\u001b[37m\u001b[49m]\u001b[39m\u001b[22m This is a warning
+[Wed, 23 May 2018 20:42:56 GMT] {{filePath}}:13:5 \u001b[1m\u001b[37m[\u001b[40m\u001b[34mINFO\u001b[37m\u001b[49m]\u001b[39m\u001b[22m This is informational
+[Wed, 23 May 2018 20:42:56 GMT] {{filePath}}:14:5 \u001b[1m\u001b[37m[\u001b[40m\u001b[32mVERBOSE\u001b[37m\u001b[49m]\u001b[39m\u001b[22m This is quite verbose
+[Wed, 23 May 2018 20:42:56 GMT] {{filePath}}:15:5 \u001b[1m\u001b[37m[\u001b[7m\u001b[47m\u001b[90mDEBUG\u001b[37m\u001b[49m\u001b[27m]\u001b[39m\u001b[22m This is for debugging purposes

@@ -1,0 +1,1 @@
+[Wed, 23 May 2018 20:42:56 GMT] {{filePath}}:16:13 \u001b[1m\u001b[37m[\u001b[40m\u001b[31mERROR\u001b[37m\u001b[49m]\u001b[39m\u001b[22m Log message from fourth level

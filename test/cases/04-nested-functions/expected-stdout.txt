@@ -1,0 +1,3 @@
+[Wed, 23 May 2018 20:42:56 GMT] {{filePath}}:10:7 \u001b[1m\u001b[37m[\u001b[40m\u001b[32mVERBOSE\u001b[37m\u001b[49m]\u001b[39m\u001b[22m Log message from first level
+[Wed, 23 May 2018 20:42:56 GMT] {{filePath}}:12:9 \u001b[1m\u001b[37m[\u001b[40m\u001b[34mINFO\u001b[37m\u001b[49m]\u001b[39m\u001b[22m Log message from second level
+[Wed, 23 May 2018 20:42:56 GMT] {{filePath}}:14:11 \u001b[1m\u001b[37m[\u001b[40m\u001b[33mWARNING\u001b[37m\u001b[49m]\u001b[39m\u001b[22m Log message from third level

@@ -1,8 +1,14 @@
+export interface Caller {
+  path: string;
+  line: string;
+  column: string;
+}
+
 /**
  * Finds out the callsite of the caller of the caller of this function.
  * In other words, wherever this function is imported and called, this returns the caller of that function.
  */
-export function getCaller() {
+export function getCaller(): Caller {
   const stackRows = new Error().stack.split("\n");
   // rows[0]: "Error"
   // rows[1]: This function

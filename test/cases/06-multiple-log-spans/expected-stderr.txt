@@ -1,0 +1,2 @@
+[Wed, 23 May 2018 20:43:00 GMT] {{filePath}}:20:13 \u001b[1m\u001b[37m[\u001b[101m\u001b[37mFATAL\u001b[37m\u001b[49m]\u001b[39m\u001b[22m \u001b[1m\u001b[37mFirst span |\u001b[39m\u001b[22m Failed in 3.75 s (+ 2.00 s)
+[Wed, 23 May 2018 20:43:05 GMT] {{filePath}}:35:13 \u001b[1m\u001b[37m[\u001b[40m\u001b[31mERROR\u001b[37m\u001b[49m]\u001b[39m\u001b[22m \u001b[1m\u001b[37mSpan without split time differences |\u001b[39m\u001b[22m Failed in 5.55 s

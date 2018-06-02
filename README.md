@@ -24,7 +24,8 @@ There are several logging libraries, but none of them seem to suite these needs:
 * Extensive TypeScript support
 * Can be used as easily and as flexibly as `console.log` or `console.error`
 * Display file path with line & column numbers (where the log function was called from)
-* Quickly navigate to log location on IDEs like
+* Quickly navigate to log location on editors like [VS Code](https://code.visualstudio.com/)
+* Track chains of requests or other asynchronous functions easily with [log spans](#log-spans)
 
 ## Getting started
 
@@ -100,6 +101,68 @@ log.silly("How do you do");
 [2018-05-22 23:33:32] /app/src/another-file.ts:4:5 [meh] Hello world
 [2018-05-22 23:33:32] /app/src/another-file.ts:5:5 [SILLY] How do you do](images/example-config-3.png?raw=true)
 
+## <a name="log-span"></a> Log spans
+
+Need to track times on chains of requests or other asynchronous functions? Because of the repetitive nature of such logging, logita provides log spans. Just create a log span with a default logging level and a name between the parentheses:
+
+```ts
+import { log } from "logita";
+
+const span = log.span.debug("My span");
+```
+
+After this you can log the span with `splitTime`, `success` and `fail` logging functions:
+```ts
+const span = log.span.debug("My span");
+try {
+  await doSomething();
+  span.splitTime();
+  await doSomethingElse();
+  span.splitTime();
+  await doSomethingFinal();
+  span.success();
+} catch (error) {
+  span.fail();
+}
+```
+![Log span screenshot #1](images/log-span-1.png?raw=true)
+
+You can also give a message for the functions to be more verbose:
+```ts
+const span = log.span.debug("My span");
+try {
+  await doSomething();
+  span.splitTime("First request done");
+  await doSomethingElse();
+  span.splitTime("Second request done");
+  await doSomethingFinal();
+  span.success("Finally finished");
+} catch (error) {
+  span.fail("Something went wrong");
+}
+```
+
+![Log span screenshot #2](images/log-span-2.png?raw=true)
+
+> **Note:** Only use messages of type `string`, because span logs _should not log actual data_. For that, please use the normal logging functions.
+
+To take things even further, you can also log each message with a different level from the default one:
+```ts
+const span = log.span.debug("My span");
+try {
+  await doSomething();
+  span.info.splitTime("First request done");
+  await doSomethingElse();
+  span.verbose.splitTime("Second request done");
+  await doSomethingFinal();
+  span.info.success("Finally finished");
+} catch (error) {
+  span.fatal.fail("Something went wrong");
+}
+```
+
+![Log span screenshot #3](images/log-span-3.png?raw=true)
+
 ## API
 
 ### createLoggers(config)
@@ -128,6 +191,12 @@ Returns an object containing a simple logging function for each given logging le
     * Boolean
     * Should the log be directed to `stderr` instead of `stdout`?
     * Default: `false`
+* **config.span** (optional)
+  * Log span specific settings
+  * **config.span.showSplitDifference** (optional)
+    * Boolean
+    * Show the split difference since the previous time?
+    * Default: `true`
 * **config.minLevel** (optional)
   * String (key of some log level)
   * Minimum log level that should be logged
@@ -183,6 +252,9 @@ Default config:
       }
     }
   },
+  span: {
+    showSplitDifference: true
+  }
   showFile: true,
   timestamp: true,
   minLevel: process.env.LOG_MIN_LEVEL || undefined,

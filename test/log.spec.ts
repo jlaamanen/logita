@@ -8,10 +8,15 @@ import * as moment from "moment-timezone";
 export const mockStdout = new MockStream();
 export const mockStderr = new MockStream();
 
+export function advanceTime(milliseconds: number) {
+  const now = Date.now();
+  Date.now = () => now + milliseconds;
+}
+
 // Use UTC timezone in unit tests to avoid different results
 moment.tz.setDefault("UTC");
 
-describe("logita", () => {
+describe("logita test cases", () => {
   // Use date: Wed, 23 May 2018 20:42:56 GMT
   const mockDate = 1527108176483;
 

@@ -1,5 +1,5 @@
 import chalk, { Chalk, ColorSupport } from "chalk";
-import { getCaller, injectWithDefaults } from "./utils";
+import { Caller, getCaller, injectWithDefaults } from "./utils";
 import * as moment from "moment";
 
 export interface LogLevel {
@@ -17,6 +17,17 @@ export interface LogLevels {
 }
 
 export interface LogSettings<T extends LogLevels = typeof defaultLevels> {
+  /**
+   * Log span specific settings
+   */
+  span?: {
+    /**
+     * Show the split time difference since previous time?
+     *
+     * Default: true
+     */
+    showSplitDifference?: boolean;
+  };
   /**
    * Minimum level which log messages should be logged.
    * If not given in config, environment variable LOG_MIN_LEVEL is read.
@@ -76,6 +87,25 @@ type NormalizedLogConfig<T extends LogLevels> = {
 
 export type LogFunction = (...messages: any[]) => void;
 
+export type LoggerObject<T extends LogLevels> = {
+  [key in Exclude<keyof T, "span">]: LogFunction
+} & {
+  span: LogSpanObject<T>;
+};
+
+export type LogSpanObject<T extends LogLevels> = {
+  [key in keyof T]: (
+    name: string
+  ) => { [key in Exclude<keyof T, LogSpanFunctionName>]: LogSpanFunctions } &
+    LogSpanFunctions
+};
+
+export type LogSpanFunctionName = "splitTime" | "success" | "fail";
+
+export type LogSpanFunctions = {
+  [key in LogSpanFunctionName]: (message?: string) => void
+};
+
 export const defaultLevels = {
   fatal: {
     priority: 0,
@@ -107,9 +137,12 @@ export const defaultLevels = {
 
 const defaultConfig: LogConfig<typeof defaultLevels> = {
   levels: defaultLevels,
-  showFile: true,
-  timestamp: true,
+  span: {
+    showSplitDifference: true
+  },
   minLevel: <keyof typeof defaultLevels>process.env.LOG_MIN_LEVEL || undefined,
+  timestamp: true,
+  showFile: true,
   stdout: console.log,
   stderr: console.error
 };
@@ -117,7 +150,10 @@ const defaultConfig: LogConfig<typeof defaultLevels> = {
 function normalizeConfig<T extends LogLevels>(
   config: LogConfig<T>
 ): NormalizedLogConfig<T> {
-  const defaultInjectedConfig = injectWithDefaults(config, defaultConfig);
+  const defaultInjectedConfig = {
+    ...injectWithDefaults(config, defaultConfig),
+    span: injectWithDefaults((config || {}).span, defaultConfig.span)
+  };
   const normalizedLevels = Object.keys(defaultInjectedConfig.levels).reduce(
     (levels, levelName) => {
       const levelValue = defaultInjectedConfig.levels[levelName];
@@ -150,13 +186,56 @@ function messageShouldBeLogged<T extends LogLevels>(
   return !minLevel || minLevel.priority >= level.priority;
 }
 
+function getPrefix<T extends LogLevels>(
+  levelName: keyof T,
+  config: NormalizedLogConfig<T>,
+  caller: Caller
+) {
+  // TODO: level is of type LogLevel after normalization, fix typings to remove this casting
+  const level = <LogLevel>config.levels[levelName];
+  const levelColor = level.color || chalk.bgBlack.white;
+  const levelText = level.text || (<string>levelName).toUpperCase();
+  const log = level.stderr ? config.stderr : config.stdout;
+  // Use default UTC string as default, otherwise format timestamp with moment.js
+  const formattedTimestamp =
+    config.timestamp === true
+      ? new Date(Date.now()).toUTCString()
+      : typeof config.timestamp === "string"
+        ? moment().format(config.timestamp)
+        : "";
+  return [
+    formattedTimestamp.length > 0 ? `[${formattedTimestamp}]` : "",
+    caller ? `${caller.path}:${caller.line}:${caller.column}` : "",
+    chalk.bold.white(`[${levelColor(levelText)}]`)
+  ]
+    .filter(part => part.length > 0)
+    .join(" ");
+}
+
+function millisecondsToSeconds(milliseconds: number, precision = 2) {
+  return Number(milliseconds / 1000).toFixed(precision);
+}
+
+function formatSpanDuration(
+  times: { start: number; previous: number },
+  showTimeDifference: boolean
+) {
+  const now = Date.now();
+  const totalDuration = millisecondsToSeconds(now - times.start);
+  const splitDuration = millisecondsToSeconds(now - times.previous);
+  times.previous = now;
+  return `${totalDuration} s${
+    showTimeDifference ? ` (+ ${splitDuration} s)` : ""
+  }`;
+}
+
 /**
  * Creates a logging function for given level name and config.
  * @param levelName
  * @param config
  */
 function createLogFunction<T extends LogLevels>(
-  levelName: string,
+  levelName: keyof T,
   config: NormalizedLogConfig<T>
 ) {
   return (...messages: any[]) => {
@@ -166,26 +245,121 @@ function createLogFunction<T extends LogLevels>(
     }
     // TODO: level is of type LogLevel after normalization, fix typings to remove this casting
     const level = <LogLevel>config.levels[levelName];
-    const levelColor = level.color || chalk.bgBlack.white;
-    const levelText = level.text || levelName.toUpperCase();
+    const prefix = getPrefix(
+      levelName,
+      config,
+      config.showFile ? getCaller() : null
+    );
     const log = level.stderr ? config.stderr : config.stdout;
-    // Use default UTC string as default, otherwise format timestamp with moment.js
-    const formattedTimestamp =
-      config.timestamp === true
-        ? new Date(Date.now()).toUTCString()
-        : typeof config.timestamp === "string"
-          ? moment().format(config.timestamp)
-          : "";
-    const caller = config.showFile ? getCaller() : null;
-    const prefix = [
-      formattedTimestamp.length > 0 ? `[${formattedTimestamp}]` : "",
-      caller ? `${caller.path}:${caller.line}:${caller.column}` : "",
-      chalk.bold.white(`[${levelColor(levelText)}]`)
-    ]
-      .filter(part => part.length > 0)
-      .join(" ");
     log(prefix, ...messages);
   };
+}
+
+function createLogSpanFunction<T extends LogLevels>(
+  levelName: keyof T,
+  config: NormalizedLogConfig<T>,
+  name: string,
+  type: LogSpanFunctionName | "start",
+  times: { start: number; previous: number },
+  spanCaller?: Caller
+) {
+  return (message?: string) => {
+    if (!messageShouldBeLogged(levelName, config)) {
+      // Logged message has lower priority (order number is higher) => skip logging
+      return;
+    }
+    // TODO: level is of type LogLevel after normalization, fix typings to remove this casting
+    const level = <LogLevel>config.levels[levelName];
+    const prefix = getPrefix(
+      levelName,
+      config,
+      config.showFile ? spanCaller || getCaller() : null
+    );
+    const log = level.stderr ? config.stderr : config.stdout;
+    const formattedMessage = (<{ [key in typeof type]: string }>{
+      start: "Started",
+      splitTime: message || "Split time",
+      success: message || "Successful in",
+      fail: message || "Failed in"
+    })[type];
+    const segments = [
+      prefix,
+      chalk.bold.white(`${name} |`),
+      formattedMessage,
+      type !== "start"
+        ? formatSpanDuration(times, config.span.showSplitDifference)
+        : ""
+    ]
+      .filter(segment => segment.length > 0)
+      .join(" ");
+    log(segments);
+  };
+}
+
+function createLogSpanObject<T extends LogLevels>(
+  loggers: LoggerObject<T>,
+  config: NormalizedLogConfig<T>
+) {
+  // Iterate through all created log levels
+  return Object.keys(loggers).reduce<LogSpanObject<T>>(
+    (spanLoggers, defaultLevelName: keyof T) =>
+      Object.assign(spanLoggers, {
+        [defaultLevelName]: (name: string) => {
+          const now = Date.now();
+          const times = {
+            start: now,
+            previous: now
+          };
+          createLogSpanFunction(
+            defaultLevelName,
+            config,
+            name,
+            "start",
+            times,
+            config.showFile ? getCaller() : null
+          )();
+          const spanLogObject = Object.keys(loggers).reduce<
+            { [key in keyof T]: LogSpanFunctions }
+          >(
+            (spanLoggers, levelName) =>
+              Object.assign(spanLoggers, {
+                [levelName]: {
+                  splitTime: createLogSpanFunction(
+                    levelName,
+                    config,
+                    name,
+                    "splitTime",
+                    times
+                  ),
+                  success: createLogSpanFunction(
+                    levelName,
+                    config,
+                    name,
+                    "success",
+                    times
+                  ),
+                  fail: createLogSpanFunction(
+                    levelName,
+                    config,
+                    name,
+                    "fail",
+                    times
+                  )
+                }
+              }),
+            <any>{}
+          );
+
+          return Object.assign(spanLogObject, {
+            // Assign default
+            splitTime: spanLogObject[defaultLevelName].splitTime,
+            success: spanLogObject[defaultLevelName].success,
+            fail: spanLogObject[defaultLevelName].fail
+          });
+        }
+      }),
+    <any>{}
+  );
 }
 
 /**
@@ -198,9 +372,7 @@ export function createLoggers<T extends LogLevels = typeof defaultLevels>(
   config?: LogConfig<T>
 ) {
   const normalizedConfig = normalizeConfig(config);
-  return Object.keys(normalizedConfig.levels).reduce<
-    { [key in keyof T]: LogFunction }
-  >(
+  const loggers = Object.keys(normalizedConfig.levels).reduce<LoggerObject<T>>(
     (loggers, levelName) =>
       Object.assign(loggers, {
         [levelName]: createLogFunction(levelName, normalizedConfig)
@@ -209,6 +381,8 @@ export function createLoggers<T extends LogLevels = typeof defaultLevels>(
     // (all keys will be present for the returned value anyway)
     <any>{}
   );
+  loggers.span = createLogSpanObject(loggers, normalizedConfig);
+  return loggers;
 }
 
 /**

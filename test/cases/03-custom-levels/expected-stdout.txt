@@ -1,0 +1,2 @@
+[23.05.2018 20:42:56] \u001b[1m\u001b[37m[\u001b[33mmeh\u001b[37m]\u001b[39m\u001b[22m Hello world
+[23.05.2018 20:42:56] \u001b[1m\u001b[37m[\u001b[32mSILLY\u001b[37m]\u001b[39m\u001b[22m How do you do

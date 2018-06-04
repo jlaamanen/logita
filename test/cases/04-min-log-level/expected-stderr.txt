@@ -1,0 +1,7 @@
+[Wed, 23 May 2018 20:42:56 GMT] {{filePath}}:15:12 \u001b[1m\u001b[37m[\u001b[40m\u001b[31mERROR\u001b[37m\u001b[49m]\u001b[39m\u001b[22m Should be displayed
+[Wed, 23 May 2018 20:42:56 GMT] {{filePath}}:16:12 \u001b[1m\u001b[37m[\u001b[101m\u001b[37mFATAL\u001b[37m\u001b[49m]\u001b[39m\u001b[22m Should be displayed
+[Wed, 23 May 2018 20:42:56 GMT] {{filePath}}:24:22 \u001b[1m\u001b[37m[\u001b[40m\u001b[31mERROR\u001b[37m\u001b[49m]\u001b[39m\u001b[22m \u001b[1m\u001b[37mDefault log span |\u001b[39m\u001b[22m Should be displayed 0.00 s (+ 0.00 s)
+[Wed, 23 May 2018 20:42:56 GMT] {{filePath}}:25:22 \u001b[1m\u001b[37m[\u001b[101m\u001b[37mFATAL\u001b[37m\u001b[49m]\u001b[39m\u001b[22m \u001b[1m\u001b[37mDefault log span |\u001b[39m\u001b[22m Should be displayed 0.00 s (+ 0.00 s)
+[Wed, 23 May 2018 20:42:56 GMT] \u001b[1m\u001b[37m[\u001b[41m\u001b[37mUH-OH\u001b[37m\u001b[49m]\u001b[39m\u001b[22m Should be displayed
+[Wed, 23 May 2018 20:42:56 GMT] \u001b[1m\u001b[37m[\u001b[41m\u001b[37mUH-OH\u001b[37m\u001b[49m]\u001b[39m\u001b[22m \u001b[1m\u001b[37mCustom log span |\u001b[39m\u001b[22m Should be displayed 0.00 s (+ 0.00 s)
+[Wed, 23 May 2018 20:42:56 GMT] \u001b[1m\u001b[37m[\u001b[41m\u001b[37mUH-OH\u001b[37m\u001b[49m]\u001b[39m\u001b[22m \u001b[1m\u001b[37mCustom log span |\u001b[39m\u001b[22m Should be displayed 0.00 s (+ 0.00 s)

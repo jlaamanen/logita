@@ -4,7 +4,7 @@ import { mockStdout, mockStderr } from "test/log.spec";
 const log = createLoggers({
   stdout: mockStdout.log.bind(mockStdout),
   stderr: mockStderr.log.bind(mockStderr),
-  timestamp: "DD.MM.YYYY HH:mm:ss",
+  timestamp: false,
   showFile: false
 });
 

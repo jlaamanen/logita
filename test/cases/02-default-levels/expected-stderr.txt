@@ -1,2 +1,2 @@
-[23.05.2018 20:42:56] \u001b[1m\u001b[37m[\u001b[101m\u001b[37mFATAL\u001b[37m\u001b[49m]\u001b[39m\u001b[22m This is a fatal log message!!
-[23.05.2018 20:42:56] \u001b[1m\u001b[37m[\u001b[40m\u001b[31mERROR\u001b[37m\u001b[49m]\u001b[39m\u001b[22m This is an error log message!
+\u001b[1m\u001b[37m[\u001b[101m\u001b[37mFATAL\u001b[37m\u001b[49m]\u001b[39m\u001b[22m This is a fatal log message!!
+\u001b[1m\u001b[37m[\u001b[40m\u001b[31mERROR\u001b[37m\u001b[49m]\u001b[39m\u001b[22m This is an error log message!

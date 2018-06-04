@@ -14,10 +14,7 @@ export function getCaller(): Caller {
   // rows[1]: This function
   // rows[2]: Caller of this function
   // rows[3]: Caller of the caller of this function (which we want to return)
-  const stackLine = stackRows.length >= 4 ? stackRows[3] : null;
-  if (!stackLine) {
-    return null;
-  }
+  const stackLine = stackRows[3];
   const [original, path, line, column] = stackLine.match(
     /\(?(\S*):(\d+):(\d+)\)?/
   );

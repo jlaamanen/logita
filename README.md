@@ -6,7 +6,7 @@
 
 Simplistic logging for node.js with extensive TypeScript support.
 
-[![Published on npm](https://img.shields.io/npm/v/logita.svg)](https://www.npmjs.com/package/logita) [![Build Status](https://travis-ci.com/jlaamanen/logita.svg?branch=master)](https://travis-ci.com/jlaamanen/logita) [![Coverage Status](https://coveralls.io/repos/github/jlaamanen/logita/badge.svg?branch=master)](https://coveralls.io/github/jlaamanen/logita?branch=master)
+[![Published on npm](https://img.shields.io/npm/v/logita.svg)](https://www.npmjs.com/package/logita) [![Build Status](https://travis-ci.com/jlaamanen/logita.svg?branch=master)](https://travis-ci.com/jlaamanen/logita) [![Coverage Status](https://coveralls.io/repos/github/jlaamanen/logita/badge.svg?branch=master)](https://coveralls.io/github/jlaamanen/logita?branch=master) [![Greenkeeper badge](https://badges.greenkeeper.io/jlaamanen/logita.svg)](https://greenkeeper.io/)
 ```shell
 npm i logita
 ```
